@@ -224,13 +224,21 @@ class MajorDomoBroker(object):
         """Handle internal service according to 8/MMI specification"""
         returncode = b"501"
         if b"mmi.service" == service:
-            name = msg[-1]
-            returncode = b"200" if name in self.services else b"404"
+            # name = msg[-1]
+            # returncode = b"200" if name in self.services else b"404"
+            returncode = b", ".join(self.services)
         msg[-1] = returncode
 
         # insert the protocol header and service name after the routing envelope ([client, ''])
         msg = msg[:2] + [MDP.C_CLIENT, service] + msg[2:]
         self.socket.send_multipart(msg)
+
+
+    def discover_internal(self, service, msg):
+        """
+        Discover the list of services available.
+        """
+        raise NotImplementedError
 
     def send_heartbeats(self):
         """Send heartbeats to idle workers if it's time"""

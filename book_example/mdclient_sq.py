@@ -8,16 +8,20 @@ Author : Min RK <benjaminrk@gmail.com>
 """
 
 import sys
+import time
+import random
 from mdcliapi import MajorDomoClient
 
 def main():
     verbose = '-v' in sys.argv
     client = MajorDomoClient("tcp://localhost:5555", verbose)
     count = 0
-    while count < 10000:
-        request = b"Hello world"
+    while count < 10:
+        request = str(random.randint(20, 99)).encode()
         try:
-            reply = client.send(b"echo", request)
+            reply = client.send(b"square", request)
+            print(request.decode(), reply[0].decode())
+            time.sleep(1)
         except KeyboardInterrupt:
             break
         else:

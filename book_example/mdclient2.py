@@ -13,7 +13,7 @@ from mdcliapi2 import MajorDomoClient
 def main():
     verbose = '-v' in sys.argv
     client = MajorDomoClient("tcp://localhost:5555", verbose)
-    requests = 10000
+    requests = 100000
     for i in range(requests):
         request = b"Hello world"
         try:
