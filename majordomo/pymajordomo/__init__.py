@@ -1,0 +1,2 @@
+from pymajordomo.mdwrkapi import MajorDomoWorker
+from pymajordomo.mdcliapi2 import MajorDomoClient

@@ -2,6 +2,10 @@ import sys
 from mdwrkapi import MajorDomoWorker
 
 def main():
+    """
+    This is the main function
+    """
+    print(main.__doc__)
     verbose = '-v' in sys.argv
     worker = MajorDomoWorker("tcp://localhost:5555", b"square", verbose)
     reply = None
