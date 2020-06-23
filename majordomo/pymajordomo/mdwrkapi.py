@@ -1,25 +1,47 @@
-
-
-"""Majordomo Protocol Worker API, Python version
-
-Implements the MDP/Worker spec at http:#rfc.zeromq.org/spec:7.
-
-Author: Min RK <benjaminrk@gmail.com>
-Based on Java example by Arkadiusz Orzechowski
-"""
-
 import logging
 import time
 import zmq
 
-from zhelpers import dump
+from .zhelpers import dump
 # MajorDomo protocol constants:
-import MDP
+import pymajordomo.MDP as MDP
 
 class MajorDomoWorker(object):
     """Majordomo Protocol Worker API, Python version
 
-    Implements the MDP/Worker spec at http:#rfc.zeromq.org/spec:7.
+    Implements the MDP/Worker spec at https://rfc.zeromq.org/spec/7/
+
+    Parameters
+    -----------
+    broker: str
+
+    service: str
+
+    verbose: bool
+
+
+    
+    Attributes
+    -----------
+    ctx : zmq.Context
+
+    worker: zmq.Socket
+        socket to the broker
+
+    hearbeat_at: int
+        when to send heartbeat
+
+    liveness: int
+        number of attempts remaining
+
+    hearbeat: int  
+        Hearbeat delay in milliseconds
+
+    reconnect: int
+        Reconnect delay in milliseconds
+
+    timeout : int
+        Poller timeout in milliseconds
     """
 
     HEARTBEAT_LIVENESS = 3 # 3-5 is reasonable
@@ -34,7 +56,7 @@ class MajorDomoWorker(object):
     reconnect = 2500 # Reconnect delay, msecs
 
     # Internal state
-    expect_reply = False # False only at start
+    __expect_reply__ = False # False only at start
 
     timeout = 2500 # poller timeout
     verbose = False # Print activity to stdout
@@ -44,7 +66,10 @@ class MajorDomoWorker(object):
 
     def __init__(self, broker, service, verbose=False):
         self.broker = broker
-        self.service = service
+        if isinstance(service, str):
+            self.service = service.encode()
+        else:
+            raise TypeError("Service name should be a string.")
         self.verbose = verbose
         self.ctx = zmq.Context()
         self.poller = zmq.Poller()
@@ -94,14 +119,14 @@ class MajorDomoWorker(object):
     def recv(self, reply=None):
         """Send reply, if any, to broker and wait for next request."""
         # Format and send the reply if we were provided one
-        assert reply is not None or not self.expect_reply
+        assert reply is not None or not self.__expect_reply__
 
         if reply is not None:
             assert self.reply_to is not None
             reply = [self.reply_to, b''] + reply
             self.send_to_broker(MDP.W_REPLY, msg=reply)
 
-        self.expect_reply = True
+        self.__expect_reply__ = True
 
         while True:
             # Poll socket for a reply, with timeout

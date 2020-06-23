@@ -1,24 +1,35 @@
-
-
-"""Majordomo Protocol Client API, Python version.
-
-Implements the MDP/Worker spec at http:#rfc.zeromq.org/spec:7.
-
-Author: Min RK <benjaminrk@gmail.com>
-Based on Java example by Arkadiusz Orzechowski
-"""
-
 import logging
 
 import zmq
 
-import MDP
-from zhelpers import dump
+import pymajordomo.MDP as MDP
+from .zhelpers import dump
 
 class MajorDomoClient(object):
-    """Majordomo Protocol Client API, Python version.
+    """
+        Majordomo Protocol Client API, Python version.
+        Implements the MDP/Worker spec at https://rfc.zeromq.org/spec/7/
 
-      Implements the MDP/Worker spec at http:#rfc.zeromq.org/spec:7.
+        Parameters
+        -----------
+        broker : str
+            location of the broker as a string, eg. "tcp://localhost:5555/"
+        
+        verbose: bool
+            True if you want std out messages.
+
+        Attributes
+        ------------
+        ctx : zeromq context
+        
+        poller: zmq.Poller
+            For Polling for results
+
+        client: zmq.Socket
+            socket to ther broker
+        
+        timeout: int
+            request timeout in milliseconds.
     """
     broker = None
     ctx = None

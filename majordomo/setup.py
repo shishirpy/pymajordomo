@@ -7,5 +7,5 @@ setup(name='pymajordomo',
       author='Shishir Pandey',
       author_email='shishir.py@gmail.com',
       license='MPL',
-      packages=['majordomo'],
+      packages=['pymajordomo'],
       zip_safe=False)
