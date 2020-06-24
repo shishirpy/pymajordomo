@@ -19,6 +19,8 @@ import zmq
 import MDP
 from zhelpers import dump
 
+import click
+
 class Service(object):
     """a single Service"""
     name = None # Service name
