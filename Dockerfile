@@ -13,4 +13,4 @@ COPY . .
 COPY requirement.txt .
 RUN pip install -r requirement.txt
 
-CMD ["python", "mdbroker.py"]
+CMD ["python", "broker_main.py", "--port", "5555"]

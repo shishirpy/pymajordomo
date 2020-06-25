@@ -1,5 +1,3 @@
-
-
 """
 Majordomo Protocol broker
 A minimal implementation of http:#rfc.zeromq.org/spec:7 and spec:8
@@ -12,42 +10,19 @@ import logging
 import sys
 import time
 from binascii import hexlify
+import click
 
 import zmq
 
-# local
-import MDP
-from zhelpers import dump
 
-import click
+from broker.zhelpers import dump
+from broker import Worker, Service, MDP
 
-class Service(object):
-    """a single Service"""
-    name = None # Service name
-    requests = None # List of client requests
-    waiting = None # List of waiting workers
-
-    def __init__(self, name):
-        self.name = name
-        self.requests = []
-        self.waiting = []
-
-class Worker(object):
-    """a Worker, idle or active"""
-    identity = None # hex Identity of worker
-    address = None # Address to route to
-    service = None # Owning service, if known
-    expiry = None # expires at this point, unless heartbeat
-
-    def __init__(self, identity, address, lifetime):
-        self.identity = identity
-        self.address = address
-        self.expiry = time.time() + 1e-3*lifetime
 
 class MajorDomoBroker(object):
     """
-    Majordomo Protocol broker
-    A minimal implementation of http:#rfc.zeromq.org/spec:7 and spec:8
+        Majordomo Protocol broker
+        A minimal implementation of http:#rfc.zeromq.org/spec:7 and spec:8
     """
 
     # We'd normally pull these from config data
@@ -243,7 +218,9 @@ class MajorDomoBroker(object):
         raise NotImplementedError
 
     def send_heartbeats(self):
-        """Send heartbeats to idle workers if it's time"""
+        """
+            Send heartbeats to idle workers if it's time
+        """
         if (time.time() > self.heartbeat_at):
             for worker in self.waiting:
                 self.send_to_worker(worker, MDP.W_HEARTBEAT, None, None)
@@ -251,9 +228,10 @@ class MajorDomoBroker(object):
             self.heartbeat_at = time.time() + 1e-3*self.HEARTBEAT_INTERVAL
 
     def purge_workers(self):
-        """Look for & kill expired workers.
+        """
+            Look for & kill expired workers.
 
-        Workers are oldest to most recent, so we stop at the first alive worker.
+            Workers are oldest to most recent, so we stop at the first alive worker.
         """
         while self.waiting:
             w = self.waiting[0]
@@ -265,7 +243,9 @@ class MajorDomoBroker(object):
                 break
 
     def worker_waiting(self, worker):
-        """This worker is now waiting for work."""
+        """
+            This worker is now waiting for work.
+        """
         # Queue to broker and service waiting lists
         self.waiting.append(worker)
         worker.service.waiting.append(worker)
@@ -273,7 +253,9 @@ class MajorDomoBroker(object):
         self.dispatch(worker.service, None)
 
     def dispatch(self, service, msg):
-        """Dispatch requests to waiting workers as possible"""
+        """
+            Dispatch requests to waiting workers as possible
+        """
         assert (service is not None)
         if msg is not None:# Queue message if any
             service.requests.append(msg)
@@ -285,9 +267,10 @@ class MajorDomoBroker(object):
             self.send_to_worker(worker, MDP.W_REQUEST, None, msg)
 
     def send_to_worker(self, worker, command, option, msg=None):
-        """Send message to worker.
+        """
+            Send message to worker.
 
-        If message is provided, sends that message.
+            If message is provided, sends that message.
         """
 
         if msg is None:
@@ -307,12 +290,14 @@ class MajorDomoBroker(object):
 
         self.socket.send_multipart(msg)
 
+
 def main():
     """create and start new broker"""
     verbose = '-v' in sys.argv
     broker = MajorDomoBroker(verbose)
-    broker.bind("tcp://*:5555")
+    broker.bind(f"tcp://*:6789")
     broker.mediate()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

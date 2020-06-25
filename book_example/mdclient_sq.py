@@ -20,8 +20,11 @@ def main():
         request = str(random.randint(20, 99)).encode()
         try:
             reply = client.send(b"square", request)
-            print(request.decode(), reply[0].decode())
-            time.sleep(1)
+            try:
+                print(request.decode(), reply[0].decode())
+                time.sleep(0.1)
+            except TypeError:
+                break
         except KeyboardInterrupt:
             break
         else:
